@@ -96,11 +96,21 @@ export const Hero = () => {
     );
   };
 
-  // Move to Trash
+  // Move to Trash with confirmation
   const handleDelete = (id: number) => {
-    setTodos((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, removed: true } : t))
-    );
+    const todo = todos.find((t) => t.id === id);
+    const taskName = todo?.title ? `"${todo.title}"` : "this task";
+    setDialog({
+      isOpen: true,
+      title: "Please Confirm",
+      message: `Are you sure you want to delete ${taskName}?`,
+      type: "confirm",
+      onConfirm: () => {
+        setTodos((prev) =>
+          prev.map((t) => (t.id === id ? { ...t, removed: true } : t))
+        );
+      },
+    });
   };
 
   // Restore from Trash
@@ -110,9 +120,19 @@ export const Hero = () => {
     );
   };
 
-  // Permanent Delete
+  // Permanent Delete with confirmation
   const handlePermanentDelete = (id: number) => {
-    setTodos((prev) => prev.filter((t) => t.id !== id));
+    const todo = todos.find((t) => t.id === id);
+    const taskName = todo?.title ? `"${todo.title}"` : "this task";
+    setDialog({
+      isOpen: true,
+      title: "Permanent Delete",
+      message: `Are you sure you want to permanently delete ${taskName}? This action cannot be undone.`,
+      type: "confirm",
+      onConfirm: () => {
+        setTodos((prev) => prev.filter((t) => t.id !== id));
+      },
+    });
   };
 
   // Edit Todo
@@ -224,6 +244,18 @@ export const Hero = () => {
     });
   };
 
+  const handleClearTrash = () => {
+    setDialog({
+      isOpen: true,
+      title: "Please Confirm",
+      message: "Are you sure you want to permanently delete all items in Trash? This action cannot be undone.",
+      type: "confirm",
+      onConfirm: () => {
+        setTodos((prev) => prev.filter((t) => !t.removed));
+      },
+    });
+  };
+
   // Slogan editing
   const handleSaveSlogan = () => {
     const trimmed = tempSlogan.trim() || DEFAULT_SLOGAN;
@@ -276,6 +308,16 @@ export const Hero = () => {
                 className="h-full px-4 text-xs md:text-sm font-bold bg-[#8CD4CB] text-[#33322E] border-r-2 border-[#33322E] hover:bg-[#72c2b8] transition-colors cursor-pointer whitespace-nowrap"
               >
                 Mark All Done
+              </button>
+            )}
+
+            {filter === "removed" && trashTodos.length > 0 && (
+              <button
+                type="button"
+                onClick={handleClearTrash}
+                className="h-full px-4 text-xs md:text-sm font-bold bg-[#F6A89E] text-[#33322E] border-r-2 border-[#33322E] hover:bg-[#f39589] transition-colors cursor-pointer whitespace-nowrap"
+              >
+                Clear All Trash
               </button>
             )}
 
@@ -389,6 +431,7 @@ export const Hero = () => {
           onFinishAll={handleMarkAllDone}
           onClearCompleted={handleClearCompleted}
           onClearAll={handleClearAll}
+          onClearTrash={handleClearTrash}
           onExport={handleExport}
         />
       </div>

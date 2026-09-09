@@ -11,6 +11,7 @@ interface TodoSidebarProps {
   onFinishAll: () => void;
   onClearCompleted: () => void;
   onClearAll: () => void;
+  onClearTrash: () => void;
   onExport: () => void;
 }
 
@@ -24,6 +25,7 @@ export const TodoSidebar = ({
   onFinishAll,
   onClearCompleted,
   onClearAll,
+  onClearTrash,
   onExport,
 }: TodoSidebarProps) => {
   const [isOpenMobile, setIsOpenMobile] = useState(false);
@@ -123,9 +125,21 @@ export const TodoSidebar = ({
               <button
                 type="button"
                 onClick={onClearAll}
-                className="w-full py-2 px-3 text-xs md:text-sm font-medium bg-white hover:bg-[#F6A89E] transition-colors cursor-pointer"
+                className={`w-full py-2 px-3 text-xs md:text-sm font-medium bg-white hover:bg-[#F6A89E] transition-colors cursor-pointer ${
+                  trashCount > 0 ? "border-b border-[#33322E]" : ""
+                }`}
               >
                 Clear All
+              </button>
+            )}
+
+            {trashCount > 0 && (
+              <button
+                type="button"
+                onClick={onClearTrash}
+                className="w-full py-2 px-3 text-xs md:text-sm font-medium bg-white hover:bg-[#F6A89E] transition-colors cursor-pointer"
+              >
+                Clear Trash
               </button>
             )}
           </div>
