@@ -1,11 +1,248 @@
 @import "tailwindcss";
 
+:root {
+  --body-bg: #e8f6ff;
+  --border-radius: 12px;
+  --border: 2px solid #33322e;
+  --box-shadow: 4px 4px 0px #33322e;
+  --box-shadow-reverse: -4px 4px 0px #33322e;
+  --padding: 20px 24px;
+  --btn-padding: 12px 24px;
+  --btn-small-padding: 10px 20px;
+  --font-color: #33322e;
+  --font-size-base: 16px;
+  --placeholder: rgba(51, 50, 46, 0.535);
+  --font-color-complete: rgba(51, 50, 46, 0.535);
+  --bg-normal: #f9f3e5;
+  --bg-submit: #ffd6e9;
+  --bg-completed: #d0f4f0;
+  --bg-discard: #fff0ee;
+  --bg-deleted: #ddd;
+  --bg-edit: #fbeef3;
+  --normal: #f5d99e;
+  --completed: #8cd4cb;
+  --deleted: #f6a89e;
+  --black: #33322e;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
+  color: var(--font-color);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   background-image: url("./assets/Background.jpeg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Neo-brutalist custom styling and interactive states */
+.neo-border {
+  border: var(--border);
+}
+
+.neo-shadow {
+  box-shadow: var(--box-shadow);
+}
+
+.neo-shadow-reverse {
+  box-shadow: var(--box-shadow-reverse);
+}
+
+.neo-btn {
+  border: var(--border);
+  box-shadow: var(--box-shadow);
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: pointer;
+}
+
+.neo-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #33322e;
+}
+
+.neo-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #33322e;
+}
+
+/* Pendulum Clock Animation */
+.pendulums {
+  position: absolute;
+  width: 50px;
+  height: 72px;
+  right: -56px;
+  bottom: -2px;
+  perspective: 640px;
+}
+
+.pendulum {
+  position: absolute;
+  width: 50px;
+  height: 70px;
+  right: 44%;
+  bottom: 0;
+  left: 50%;
+  transform: translateZ(-300px) translateX(-50%);
+}
+
+.pendulum:after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background-color: var(--bg-submit);
+  position: absolute;
+  top: 2px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  transform: rotate(45deg);
+  border: 3px solid var(--black);
+}
+
+.pendulum .bar {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: -5px;
+  display: block;
+  width: 26px;
+  height: 30px;
+  background: #d0f4f0;
+  border: 3px solid #33322e;
+  border-radius: 15px;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+}
+
+.pendulum .string {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 72px;
+  background: var(--black);
+}
+
+.pendulum .weight {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 14px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #f8d966;
+  border: 3px solid #33322e;
+}
+
+.pendulum .motion {
+  position: absolute;
+  height: 90px;
+  width: 50px;
+  transform-origin: 50% 10px;
+  animation: swing 1.8s infinite ease-in-out;
+}
+
+@keyframes swing {
+  0% {
+    transform: rotate(-45deg);
+  }
+  50% {
+    transform: rotate(45deg);
+  }
+  100% {
+    transform: rotate(-45deg);
+  }
+}
+
+/* Header Floating Diamonds */
+.ani-vector {
+  position: absolute;
+  left: -60px;
+  top: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ani-vector span {
+  transform: rotateZ(45deg);
+  margin: 0 7px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--black);
+  background-color: var(--bg-submit);
+  display: inline-block;
+  border-radius: 1px;
+  animation: zooming 8s ease-in-out infinite;
+}
+
+.ani-vector span:nth-child(2) {
+  animation-delay: 2s;
+}
+
+@keyframes zooming {
+  0%, 100% {
+    transform: scale(1) rotateZ(45deg);
+  }
+  20% {
+    transform: scale(1) rotateZ(45deg);
+  }
+  30% {
+    transform: scale(1) rotateZ(135deg);
+  }
+  70% {
+    transform: scale(1) rotateZ(135deg);
+  }
+  80% {
+    transform: scale(1) rotateZ(45deg);
+  }
+}
+
+/* Input validation shake */
+.empty-shake {
+  animation: headShake 0.8s ease-in-out both;
+}
+
+@keyframes headShake {
+  0% { transform: translateX(0); }
+  6.5% { transform: translateX(-6px) rotateY(-9deg); }
+  18.5% { transform: translateX(5px) rotateY(7deg); }
+  31.5% { transform: translateX(-3px) rotateY(-5deg); }
+  43.5% { transform: translateX(2px) rotateY(3deg); }
+  50% { transform: translateX(0); }
+}
+
+/* Dialog popIn / popOut animations */
+.popIn {
+  animation: popIn 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale3d(0.7, 0.7, 0.7);
+    opacity: 0;
+  }
+  50% {
+    transform: scale3d(1.04, 1.04, 1.04);
+  }
+  100% {
+    transform: scale3d(1, 1, 1);
+    opacity: 1;
+  }
+}
+
+/* Custom Alert Overlay */
+.custom-alert-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(51, 50, 46, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 99999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
