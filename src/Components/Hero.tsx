@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { Pendulum } from "./Pendulum";
 import { TodoInput } from "./TodoInput";
 import { TodoItemCard } from "./TodoItemCard";
 import { TodoSidebar } from "./TodoSidebar";
@@ -284,11 +283,22 @@ export const Hero = () => {
     <div className="w-full min-h-screen py-10 px-4 md:px-8 flex flex-col items-center">
       {/* Header Container */}
       <div className="w-full max-w-[680px] mb-8">
-        <div className="relative mx-auto w-[220px] mb-6 select-none">
+        <div className="relative mx-auto w-[240px] mb-6 select-none flex items-center justify-center">
+          {/* Left floating diamonds */}
+          <div className="ani-vector ani-vector-left">
+            <span></span>
+            <span></span>
+          </div>
+
           <h1 className="text-5xl md:text-6xl font-black text-[#F9F3E5] tracking-wider text-center drop-shadow-[4px_4px_0px_#33322E] [-webkit-text-stroke:2px_#33322E]">
             TODO
           </h1>
-          <Pendulum />
+
+          {/* Right floating diamonds */}
+          <div className="ani-vector ani-vector-right">
+            <span></span>
+            <span></span>
+          </div>
         </div>
 
         {/* Input Form */}
