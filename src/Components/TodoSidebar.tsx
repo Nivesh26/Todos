@@ -28,8 +28,8 @@ export const TodoSidebar = ({
   onExport,
 }: TodoSidebarProps) => {
   return (
-    <aside className="sidebar-container select-none z-30 w-full md:w-auto">
-      <div className="w-full md:w-[150px] bg-white border-2 border-[#33322E] rounded-[12px] shadow-[4px_4px_0px_#33322E] overflow-hidden flex flex-col text-center">
+    <aside className="sidebar-container select-none z-30 w-full">
+      <div className="w-full bg-white border-2 border-[#33322E] rounded-[12px] shadow-[4px_4px_0px_#33322E] overflow-hidden flex flex-col text-center">
         {/* Action Lists Container */}
         <div className="flex flex-col w-full text-sm">
           {/* Section 1: Filters */}

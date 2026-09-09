@@ -283,7 +283,7 @@ export const Hero = () => {
   return (
     <div className="w-full min-h-screen py-10 px-4 md:px-8 flex flex-col items-center">
       {/* Header Container */}
-      <div className="w-full max-w-[680px] mb-8">
+      <div className="w-full max-w-[760px] mb-8">
         <div className="relative mx-auto w-[240px] mb-6 select-none flex items-center justify-center">
           {/* Left floating diamonds */}
           <div className="ani-vector ani-vector-left">
@@ -307,7 +307,7 @@ export const Hero = () => {
       </div>
 
       {/* Main Content Layout with Sidebar */}
-      <div className="w-full max-w-[680px] relative flex flex-col md:flex-row items-start gap-6">
+      <div className="w-full max-w-[760px] relative flex flex-col md:flex-row items-start gap-6">
         {/* Central Todo Card Box */}
         <div className="flex-1 w-full bg-white border-2 border-[#33322E] rounded-[12px] shadow-[4px_4px_0px_#33322E] overflow-hidden flex flex-col">
           {/* Top Bar Message & Slogan */}
@@ -431,24 +431,24 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* Sidebar Quicks Panel */}
-        <TodoSidebar
-          filter={filter}
-          onFilterChange={setFilter}
-          hasInProgress={inProgressTodos.length > 0}
-          hasCompleted={completedTodos.length > 0}
-          hasTodos={activeTodos.length > 0}
-          trashCount={trashTodos.length}
-          onFinishAll={handleMarkAllDone}
-          onClearCompleted={handleClearCompleted}
-          onClearAll={handleClearAll}
-          onClearTrash={handleClearTrash}
-          onExport={handleExport}
-        />
+        {/* Right Tools Column (Filters + Stopwatch) */}
+        <div className="w-full md:w-[200px] shrink-0 flex flex-col gap-4">
+          <TodoSidebar
+            filter={filter}
+            onFilterChange={setFilter}
+            hasInProgress={inProgressTodos.length > 0}
+            hasCompleted={completedTodos.length > 0}
+            hasTodos={activeTodos.length > 0}
+            trashCount={trashTodos.length}
+            onFinishAll={handleMarkAllDone}
+            onClearCompleted={handleClearCompleted}
+            onClearAll={handleClearAll}
+            onClearTrash={handleClearTrash}
+            onExport={handleExport}
+          />
+          <Stopwatch />
+        </div>
       </div>
-
-      {/* Stopwatch Component */}
-      <Stopwatch />
 
       {/* Confirmation & Alert Modal */}
       <ConfirmModal

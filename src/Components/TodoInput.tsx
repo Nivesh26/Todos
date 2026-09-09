@@ -48,7 +48,7 @@ export const TodoInput = ({ onAdd }: TodoInputProps) => {
         <button
           type="button"
           onClick={handleSubmit}
-          className="absolute right-0 top-0 bottom-0 w-24 h-full bg-[#ffd6e9] border-l-2 border-[#33322E] rounded-r-[10px] text-lg font-bold text-[#33322E] hover:bg-[#ffbcd9] active:bg-[#ffaecf] transition-colors flex items-center justify-center cursor-pointer"
+          className="absolute right-2 top-2 bottom-2 w-24 bg-[#ffd6e9] border-2 border-[#33322E] rounded-[8px] text-lg font-extrabold text-[#33322E] shadow-[2px_2px_0px_#33322E] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:translate-x-0 active:translate-y-0 transition-all flex items-center justify-center cursor-pointer"
         >
           Add
         </button>
