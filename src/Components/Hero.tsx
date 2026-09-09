@@ -3,6 +3,7 @@ import { TodoInput } from "./TodoInput";
 import { TodoItemCard } from "./TodoItemCard";
 import { TodoSidebar } from "./TodoSidebar";
 import { ConfirmModal } from "./ConfirmModal";
+import { Stopwatch } from "./Stopwatch";
 import type { TodoItem, FilterType, DialogState } from "../types/todo";
 
 const STORAGE_KEY = "uiineed-todos";
@@ -445,6 +446,9 @@ export const Hero = () => {
           onExport={handleExport}
         />
       </div>
+
+      {/* Stopwatch Component */}
+      <Stopwatch />
 
       {/* Confirmation & Alert Modal */}
       <ConfirmModal
