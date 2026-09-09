@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { FilterType } from "../types/todo";
 
 interface TodoSidebarProps {
@@ -12,7 +12,6 @@ interface TodoSidebarProps {
   onClearCompleted: () => void;
   onClearAll: () => void;
   onExport: () => void;
-  onImport: (file: File) => void;
 }
 
 export const TodoSidebar = ({
@@ -26,20 +25,8 @@ export const TodoSidebar = ({
   onClearCompleted,
   onClearAll,
   onExport,
-  onImport,
 }: TodoSidebarProps) => {
   const [isOpenMobile, setIsOpenMobile] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      onImport(file);
-    }
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
 
   return (
     <aside
@@ -143,30 +130,15 @@ export const TodoSidebar = ({
             )}
           </div>
 
-          {/* Section 3: Data Save & Import */}
+          {/* Section 3: Data Save */}
           <div className="flex flex-col w-full">
             <button
               type="button"
               onClick={onExport}
-              className="w-full py-2 px-3 text-xs md:text-sm font-medium border-b border-[#33322E] bg-white hover:bg-[#f8d966] transition-colors cursor-pointer"
+              className="w-full py-2 px-3 text-xs md:text-sm font-medium bg-white hover:bg-[#f8d966] transition-colors cursor-pointer"
             >
               Export data
             </button>
-
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full py-2 px-3 text-xs md:text-sm font-medium bg-white hover:bg-[#f8d966] transition-colors cursor-pointer"
-            >
-              Import(txt/json)
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".txt,.json"
-              onChange={handleFileChange}
-              className="hidden"
-            />
           </div>
         </div>
       </div>

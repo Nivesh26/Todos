@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Pendulum } from "./Pendulum";
 import { TodoInput } from "./TodoInput";
 import { TodoItemCard } from "./TodoItemCard";
@@ -21,7 +21,6 @@ export const Hero = () => {
     } catch {
       // ignore
     }
-    // Default welcome items if empty
     return [
       { id: 1, title: "Welcome to your minimalist Todo app! 👋", completed: false, removed: false },
       { id: 2, title: "Double-click me to edit this task ✏️", completed: false, removed: false },
@@ -39,8 +38,8 @@ export const Hero = () => {
   // Filter state
   const [filter, setFilter] = useState<FilterType>("all");
 
-  // Drag & drop state
-  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  // Drag & drop ref for reliable asynchronous reordering
+  const draggedIdRef = useRef<number | null>(null);
 
   // Dialog / Confirm state
   const [dialog, setDialog] = useState<DialogState>({
@@ -123,36 +122,63 @@ export const Hero = () => {
     );
   };
 
-  // Drag Reorder
-  const handleDragStart = (index: number) => {
-    setDragIndex(index);
-  };
-
-  const handleDragEnter = (targetIndex: number) => {
-    if (dragIndex === null || dragIndex === targetIndex) return;
+  // Explicit Move Up button
+  const handleMoveUp = (id: number) => {
+    const currentIndex = displayedTodos.findIndex((t) => t.id === id);
+    if (currentIndex <= 0) return;
+    const targetItem = displayedTodos[currentIndex - 1];
 
     setTodos((prev) => {
-      // Find items in current displayed view
-      const itemToMove = displayedTodos[dragIndex];
-      const targetItem = displayedTodos[targetIndex];
-      if (!itemToMove || !targetItem) return prev;
-
-      const fromOriginalIndex = prev.findIndex((t) => t.id === itemToMove.id);
-      const toOriginalIndex = prev.findIndex((t) => t.id === targetItem.id);
-
-      if (fromOriginalIndex === -1 || toOriginalIndex === -1) return prev;
-
+      const fromIndex = prev.findIndex((t) => t.id === id);
+      const toIndex = prev.findIndex((t) => t.id === targetItem.id);
+      if (fromIndex === -1 || toIndex === -1) return prev;
       const updated = [...prev];
-      updated.splice(fromOriginalIndex, 1);
-      updated.splice(toOriginalIndex, 0, itemToMove);
+      const [moved] = updated.splice(fromIndex, 1);
+      updated.splice(toIndex, 0, moved);
       return updated;
     });
+  };
 
-    setDragIndex(targetIndex);
+  // Explicit Move Down button
+  const handleMoveDown = (id: number) => {
+    const currentIndex = displayedTodos.findIndex((t) => t.id === id);
+    if (currentIndex === -1 || currentIndex >= displayedTodos.length - 1) return;
+    const targetItem = displayedTodos[currentIndex + 1];
+
+    setTodos((prev) => {
+      const fromIndex = prev.findIndex((t) => t.id === id);
+      const toIndex = prev.findIndex((t) => t.id === targetItem.id);
+      if (fromIndex === -1 || toIndex === -1) return prev;
+      const updated = [...prev];
+      const [moved] = updated.splice(fromIndex, 1);
+      updated.splice(toIndex, 0, moved);
+      return updated;
+    });
+  };
+
+  // Drag Reorder with ref-based tracking (fixes moving bottom task up!)
+  const handleDragStart = (id: number) => {
+    draggedIdRef.current = id;
+  };
+
+  const handleDragOverItem = (targetId: number) => {
+    const draggedId = draggedIdRef.current;
+    if (draggedId === null || draggedId === targetId) return;
+
+    setTodos((prev) => {
+      const fromIndex = prev.findIndex((t) => t.id === draggedId);
+      const toIndex = prev.findIndex((t) => t.id === targetId);
+      if (fromIndex === -1 || toIndex === -1) return prev;
+
+      const updated = [...prev];
+      const [movedItem] = updated.splice(fromIndex, 1);
+      updated.splice(toIndex, 0, movedItem);
+      return updated;
+    });
   };
 
   const handleDragEnd = () => {
-    setDragIndex(null);
+    draggedIdRef.current = null;
   };
 
   // Batch actions
@@ -220,45 +246,6 @@ export const Hero = () => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-  };
-
-  // Import data
-  const handleImport = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const content = e.target?.result as string;
-        const parsed = JSON.parse(content);
-        if (Array.isArray(parsed)) {
-          const timestamp = Date.now();
-          const validTodos: TodoItem[] = parsed.map((item, idx) => ({
-            id: timestamp + idx,
-            title: String(item.title || "Untitled"),
-            completed: Boolean(item.completed),
-            removed: Boolean(item.removed),
-          }));
-
-          setTodos((prev) => [...validTodos, ...prev]);
-          setDialog({
-            isOpen: true,
-            title: "Success",
-            message: `Successfully imported ${validTodos.length} items!`,
-            type: "alert",
-          });
-        } else {
-          throw new Error("Invalid format: Root must be an array of todos");
-        }
-      } catch (err: unknown) {
-        const errMsg = err instanceof Error ? err.message : String(err);
-        setDialog({
-          isOpen: true,
-          title: "Import Error",
-          message: "Failed to parse file. Please ensure it is valid JSON or exported text.\n" + errMsg,
-          type: "alert",
-        });
-      }
-    };
-    reader.readAsText(file);
   };
 
   return (
@@ -344,11 +331,11 @@ export const Hero = () => {
                   <ul className="space-y-2 text-sm text-[#33322E]/80 font-medium">
                     <li className="font-bold text-[#33322E]">Usage Tips 💡:</li>
                     <li>✔️ Press Enter to submit actions.</li>
-                    <li>✔️ Drag to reorder your to-dos.</li>
+                    <li>✔️ Click ▲ / ▼ or drag to reorder tasks.</li>
                     <li>✔️ Double-click to edit slogan and tasks.</li>
                     <li>✔️ Access quick actions in the right sidebar.</li>
                     <li>🔒 Your data is stored locally in your browser.</li>
-                    <li>📝 Supports data download and import.</li>
+                    <li>📝 Supports data export.</li>
                   </ul>
                 )}
               </div>
@@ -358,15 +345,18 @@ export const Hero = () => {
                   <TodoItemCard
                     key={todo.id}
                     todo={todo}
-                    index={idx}
+                    isFirst={idx === 0}
+                    isLast={idx === displayedTodos.length - 1}
                     isTrashView={filter === "removed"}
                     onToggleComplete={handleToggleComplete}
                     onDelete={handleDelete}
                     onRestore={handleRestore}
                     onPermanentDelete={handlePermanentDelete}
                     onEdit={handleEdit}
+                    onMoveUp={handleMoveUp}
+                    onMoveDown={handleMoveDown}
                     onDragStart={handleDragStart}
-                    onDragEnter={handleDragEnter}
+                    onDragOverItem={handleDragOverItem}
                     onDragEnd={handleDragEnd}
                   />
                 ))}
@@ -400,7 +390,6 @@ export const Hero = () => {
           onClearCompleted={handleClearCompleted}
           onClearAll={handleClearAll}
           onExport={handleExport}
-          onImport={handleImport}
         />
       </div>
 
