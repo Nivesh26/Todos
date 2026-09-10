@@ -1,265 +1,74 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { TodoInput } from "./TodoInput";
 import { TodoItemCard } from "./TodoItemCard";
 import { TodoSidebar } from "./TodoSidebar";
-import { ConfirmModal } from "./ConfirmModal";
 import { Stopwatch } from "./Stopwatch";
-import type { TodoItem, FilterType, DialogState } from "../types/todo";
+import type { TodoItem, FilterType } from "../types/todo";
 
-const STORAGE_KEY = "uiineed-todos";
-const SLOGAN_KEY = "uiineed-slogan";
-const DEFAULT_SLOGAN = "Act Now, Simplify Life.☕";
+export interface HeroProps {
+  displayedTodos: TodoItem[];
+  activeTodos: TodoItem[];
+  trashTodos: TodoItem[];
+  inProgressTodos: TodoItem[];
+  completedTodos: TodoItem[];
+  filter: FilterType;
+  slogan: string;
+  onFilterChange: (filter: FilterType) => void;
+  onAddTodo: (title: string) => void;
+  onToggleComplete: (id: number) => void;
+  onDelete: (id: number) => void;
+  onRestore: (id: number) => void;
+  onPermanentDelete: (id: number) => void;
+  onEdit: (id: number, newTitle: string) => void;
+  onMoveUp: (id: number) => void;
+  onMoveDown: (id: number) => void;
+  onDragStart: (id: number) => void;
+  onDragOverItem: (id: number) => void;
+  onDragEnd: () => void;
+  onMarkAllDone: () => void;
+  onClearCompleted: () => void;
+  onClearAll: () => void;
+  onClearTrash: () => void;
+  onSaveSlogan: (newSlogan: string) => void;
+}
 
-export const Hero = () => {
-  // Load initial todos from localStorage
-  const [todos, setTodos] = useState<TodoItem[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch {
-      // ignore
-    }
-    return [
-      { id: 1, title: "Welcome to your minimalist Todo app! 👋", completed: false, removed: false },
-      { id: 2, title: "Double-click me to edit this task ✏️", completed: false, removed: false },
-      { id: 3, title: "Click the circle to mark as done ✅", completed: true, removed: false },
-    ];
-  });
-
-  // Slogan state
-  const [slogan, setSlogan] = useState<string>(() => {
-    return localStorage.getItem(SLOGAN_KEY) || DEFAULT_SLOGAN;
-  });
+export const Hero = ({
+  displayedTodos,
+  activeTodos,
+  trashTodos,
+  inProgressTodos,
+  completedTodos,
+  filter,
+  slogan,
+  onFilterChange,
+  onAddTodo,
+  onToggleComplete,
+  onDelete,
+  onRestore,
+  onPermanentDelete,
+  onEdit,
+  onMoveUp,
+  onMoveDown,
+  onDragStart,
+  onDragOverItem,
+  onDragEnd,
+  onMarkAllDone,
+  onClearCompleted,
+  onClearAll,
+  onClearTrash,
+  onSaveSlogan,
+}: HeroProps) => {
+  // Local UI state for inline slogan editing
   const [isEditingSlogan, setIsEditingSlogan] = useState(false);
-  const [tempSlogan, setTempSlogan] = useState(slogan);
+  const [tempSlogan, setTempSlogan] = useState("");
 
-  // Filter state
-  const [filter, setFilter] = useState<FilterType>("all");
-
-  // Drag & drop ref for reliable asynchronous reordering
-  const draggedIdRef = useRef<number | null>(null);
-
-  // Dialog / Confirm state
-  const [dialog, setDialog] = useState<DialogState>({
-    isOpen: false,
-    title: "",
-    message: "",
-    type: "alert",
-  });
-
-  // Persist todos
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
-    } catch (e) {
-      console.error("Failed to save todos to localStorage", e);
-    }
-  }, [todos]);
-
-  // Persist slogan
-  useEffect(() => {
-    localStorage.setItem(SLOGAN_KEY, slogan);
-  }, [slogan]);
-
-  // Helper filter sets
-  const activeTodos = todos.filter((t) => !t.removed);
-  const trashTodos = todos.filter((t) => t.removed);
-  const inProgressTodos = activeTodos.filter((t) => !t.completed);
-  const completedTodos = activeTodos.filter((t) => t.completed);
-
-  const displayedTodos =
-    filter === "ongoing"
-      ? inProgressTodos
-      : filter === "completed"
-      ? completedTodos
-      : filter === "removed"
-      ? trashTodos
-      : activeTodos;
-
-  // Add Todo
-  const handleAddTodo = (title: string) => {
-    const newTodo: TodoItem = {
-      id: Date.now(),
-      title,
-      completed: false,
-      removed: false,
-    };
-    setTodos((prev) => [newTodo, ...prev]);
+  const handleStartEditSlogan = () => {
+    setTempSlogan(slogan);
+    setIsEditingSlogan(true);
   };
 
-  // Toggle Completion
-  const handleToggleComplete = (id: number) => {
-    setTodos((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
-    );
-  };
-
-  // Move to Trash with confirmation
-  const handleDelete = (id: number) => {
-    const todo = todos.find((t) => t.id === id);
-    const taskName = todo?.title ? `"${todo.title}"` : "this task";
-    setDialog({
-      isOpen: true,
-      title: "Please Confirm",
-      message: `Are you sure you want to delete ${taskName}?`,
-      type: "confirm",
-      onConfirm: () => {
-        setTodos((prev) =>
-          prev.map((t) => (t.id === id ? { ...t, removed: true } : t))
-        );
-      },
-    });
-  };
-
-  // Restore from Trash
-  const handleRestore = (id: number) => {
-    setTodos((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, removed: false } : t))
-    );
-  };
-
-  // Permanent Delete with confirmation
-  const handlePermanentDelete = (id: number) => {
-    const todo = todos.find((t) => t.id === id);
-    const taskName = todo?.title ? `"${todo.title}"` : "this task";
-    setDialog({
-      isOpen: true,
-      title: "Permanent Delete",
-      message: `Are you sure you want to permanently delete ${taskName}? This action cannot be undone.`,
-      type: "confirm",
-      onConfirm: () => {
-        setTodos((prev) => prev.filter((t) => t.id !== id));
-      },
-    });
-  };
-
-  // Edit Todo
-  const handleEdit = (id: number, newTitle: string) => {
-    setTodos((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, title: newTitle } : t))
-    );
-  };
-
-  // Explicit Move Up button
-  const handleMoveUp = (id: number) => {
-    const currentIndex = displayedTodos.findIndex((t) => t.id === id);
-    if (currentIndex <= 0) return;
-    const targetItem = displayedTodos[currentIndex - 1];
-
-    setTodos((prev) => {
-      const fromIndex = prev.findIndex((t) => t.id === id);
-      const toIndex = prev.findIndex((t) => t.id === targetItem.id);
-      if (fromIndex === -1 || toIndex === -1) return prev;
-      const updated = [...prev];
-      const [moved] = updated.splice(fromIndex, 1);
-      updated.splice(toIndex, 0, moved);
-      return updated;
-    });
-  };
-
-  // Explicit Move Down button
-  const handleMoveDown = (id: number) => {
-    const currentIndex = displayedTodos.findIndex((t) => t.id === id);
-    if (currentIndex === -1 || currentIndex >= displayedTodos.length - 1) return;
-    const targetItem = displayedTodos[currentIndex + 1];
-
-    setTodos((prev) => {
-      const fromIndex = prev.findIndex((t) => t.id === id);
-      const toIndex = prev.findIndex((t) => t.id === targetItem.id);
-      if (fromIndex === -1 || toIndex === -1) return prev;
-      const updated = [...prev];
-      const [moved] = updated.splice(fromIndex, 1);
-      updated.splice(toIndex, 0, moved);
-      return updated;
-    });
-  };
-
-  // Drag Reorder with ref-based tracking (fixes moving bottom task up!)
-  const handleDragStart = (id: number) => {
-    draggedIdRef.current = id;
-  };
-
-  const handleDragOverItem = (targetId: number) => {
-    const draggedId = draggedIdRef.current;
-    if (draggedId === null || draggedId === targetId) return;
-
-    setTodos((prev) => {
-      const fromIndex = prev.findIndex((t) => t.id === draggedId);
-      const toIndex = prev.findIndex((t) => t.id === targetId);
-      if (fromIndex === -1 || toIndex === -1) return prev;
-
-      const updated = [...prev];
-      const [movedItem] = updated.splice(fromIndex, 1);
-      updated.splice(toIndex, 0, movedItem);
-      return updated;
-    });
-  };
-
-  const handleDragEnd = () => {
-    draggedIdRef.current = null;
-  };
-
-  // Batch actions
-  const handleMarkAllDone = () => {
-    setDialog({
-      isOpen: true,
-      title: "Please Confirm",
-      message: "Confirm to mark all tasks as completed?",
-      type: "confirm",
-      onConfirm: () => {
-        setTodos((prev) =>
-          prev.map((t) => (!t.removed ? { ...t, completed: true } : t))
-        );
-      },
-    });
-  };
-
-  const handleClearCompleted = () => {
-    setDialog({
-      isOpen: true,
-      title: "Please Confirm",
-      message: "Confirm to move all completed items to Trash?",
-      type: "confirm",
-      onConfirm: () => {
-        setTodos((prev) =>
-          prev.map((t) => (t.completed && !t.removed ? { ...t, removed: true } : t))
-        );
-      },
-    });
-  };
-
-  const handleClearAll = () => {
-    setDialog({
-      isOpen: true,
-      title: "Please Confirm",
-      message: "Confirm to move all active tasks to Trash?",
-      type: "confirm",
-      onConfirm: () => {
-        setTodos((prev) =>
-          prev.map((t) => (!t.removed ? { ...t, removed: true } : t))
-        );
-      },
-    });
-  };
-
-  const handleClearTrash = () => {
-    setDialog({
-      isOpen: true,
-      title: "Please Confirm",
-      message: "Are you sure you want to permanently delete all items in Trash? This action cannot be undone.",
-      type: "confirm",
-      onConfirm: () => {
-        setTodos((prev) => prev.filter((t) => !t.removed));
-      },
-    });
-  };
-
-  // Slogan editing
-  const handleSaveSlogan = () => {
-    const trimmed = tempSlogan.trim() || DEFAULT_SLOGAN;
-    setSlogan(trimmed);
+  const handleCommitSlogan = () => {
+    onSaveSlogan(tempSlogan);
     setIsEditingSlogan(false);
   };
 
@@ -286,7 +95,7 @@ export const Hero = () => {
         </div>
 
         {/* Input Form */}
-        <TodoInput onAdd={handleAddTodo} />
+        <TodoInput onAdd={onAddTodo} />
       </div>
 
       {/* Main Content Layout with Sidebar */}
@@ -298,7 +107,7 @@ export const Hero = () => {
             {activeTodos.length > 0 && filter !== "removed" && (
               <button
                 type="button"
-                onClick={handleMarkAllDone}
+                onClick={onMarkAllDone}
                 className="h-full px-4 text-xs md:text-sm font-bold bg-[#8CD4CB] text-[#33322E] border-r-2 border-[#33322E] hover:bg-[#72c2b8] transition-colors cursor-pointer whitespace-nowrap"
               >
                 Mark All Done
@@ -308,7 +117,7 @@ export const Hero = () => {
             {filter === "removed" && trashTodos.length > 0 && (
               <button
                 type="button"
-                onClick={handleClearTrash}
+                onClick={onClearTrash}
                 className="h-full px-4 text-xs md:text-sm font-bold bg-[#F6A89E] text-[#33322E] border-r-2 border-[#33322E] hover:bg-[#f39589] transition-colors cursor-pointer whitespace-nowrap"
               >
                 Clear All Trash
@@ -323,7 +132,7 @@ export const Hero = () => {
                     value={tempSlogan}
                     onChange={(e) => setTempSlogan(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") handleSaveSlogan();
+                      if (e.key === "Enter") handleCommitSlogan();
                       if (e.key === "Escape") setIsEditingSlogan(false);
                     }}
                     autoFocus
@@ -331,7 +140,7 @@ export const Hero = () => {
                   />
                   <button
                     type="button"
-                    onClick={handleSaveSlogan}
+                    onClick={handleCommitSlogan}
                     className="px-2 py-0.5 text-xs font-bold bg-[#ffd6e9] border border-[#33322E] rounded cursor-pointer"
                   >
                     ✓
@@ -339,10 +148,7 @@ export const Hero = () => {
                 </div>
               ) : (
                 <div
-                  onDoubleClick={() => {
-                    setTempSlogan(slogan);
-                    setIsEditingSlogan(true);
-                  }}
+                  onDoubleClick={handleStartEditSlogan}
                   title="Double-click to edit slogan"
                   className="w-full text-xs md:text-sm font-bold text-[#33322E] truncate cursor-pointer"
                 >
@@ -393,16 +199,16 @@ export const Hero = () => {
                     isFirst={idx === 0}
                     isLast={idx === displayedTodos.length - 1}
                     isTrashView={filter === "removed"}
-                    onToggleComplete={handleToggleComplete}
-                    onDelete={handleDelete}
-                    onRestore={handleRestore}
-                    onPermanentDelete={handlePermanentDelete}
-                    onEdit={handleEdit}
-                    onMoveUp={handleMoveUp}
-                    onMoveDown={handleMoveDown}
-                    onDragStart={handleDragStart}
-                    onDragOverItem={handleDragOverItem}
-                    onDragEnd={handleDragEnd}
+                    onToggleComplete={onToggleComplete}
+                    onDelete={onDelete}
+                    onRestore={onRestore}
+                    onPermanentDelete={onPermanentDelete}
+                    onEdit={onEdit}
+                    onMoveUp={onMoveUp}
+                    onMoveDown={onMoveDown}
+                    onDragStart={onDragStart}
+                    onDragOverItem={onDragOverItem}
+                    onDragEnd={onDragEnd}
                   />
                 ))}
               </ul>
@@ -427,25 +233,19 @@ export const Hero = () => {
         <div className="w-full md:w-[200px] shrink-0 flex flex-col gap-4">
           <TodoSidebar
             filter={filter}
-            onFilterChange={setFilter}
+            onFilterChange={onFilterChange}
             hasInProgress={inProgressTodos.length > 0}
             hasCompleted={completedTodos.length > 0}
             hasTodos={activeTodos.length > 0}
             trashCount={trashTodos.length}
-            onFinishAll={handleMarkAllDone}
-            onClearCompleted={handleClearCompleted}
-            onClearAll={handleClearAll}
-            onClearTrash={handleClearTrash}
+            onFinishAll={onMarkAllDone}
+            onClearCompleted={onClearCompleted}
+            onClearAll={onClearAll}
+            onClearTrash={onClearTrash}
           />
           <Stopwatch />
         </div>
       </div>
-
-      {/* Confirmation & Alert Modal */}
-      <ConfirmModal
-        dialog={dialog}
-        onClose={() => setDialog((prev) => ({ ...prev, isOpen: false }))}
-      />
     </div>
   );
 };
