@@ -11,7 +11,6 @@ interface TodoSidebarProps {
   onClearCompleted: () => void;
   onClearAll: () => void;
   onClearTrash: () => void;
-  onExport: () => void;
 }
 
 export const TodoSidebar = ({
@@ -25,15 +24,16 @@ export const TodoSidebar = ({
   onClearCompleted,
   onClearAll,
   onClearTrash,
-  onExport,
 }: TodoSidebarProps) => {
+  const hasBatchActions = hasInProgress || hasCompleted || hasTodos || trashCount > 0;
+
   return (
     <aside className="sidebar-container select-none z-30 w-full">
       <div className="w-full bg-white border-2 border-[#33322E] rounded-[12px] shadow-[4px_4px_0px_#33322E] overflow-hidden flex flex-col text-center">
         {/* Action Lists Container */}
         <div className="flex flex-col w-full text-sm">
           {/* Section 1: Filters */}
-          <div className="flex flex-col w-full border-b-2 border-[#33322E]">
+          <div className={`flex flex-col w-full ${hasBatchActions ? "border-b-2 border-[#33322E]" : ""}`}>
             <button
               type="button"
               onClick={() => onFilterChange("all")}
@@ -84,60 +84,51 @@ export const TodoSidebar = ({
           </div>
 
           {/* Section 2: Batch Actions */}
-          <div className="flex flex-col w-full border-b-2 border-[#33322E]">
-            {hasInProgress && (
-              <button
-                type="button"
-                onClick={onFinishAll}
-                className="w-full py-2 px-3 text-xs md:text-sm font-medium border-b border-[#33322E] bg-white hover:bg-[#8CD4CB] transition-colors cursor-pointer"
-              >
-                Finish all
-              </button>
-            )}
+          {hasBatchActions && (
+            <div className="flex flex-col w-full">
+              {hasInProgress && (
+                <button
+                  type="button"
+                  onClick={onFinishAll}
+                  className="w-full py-2 px-3 text-xs md:text-sm font-medium border-b border-[#33322E] bg-white hover:bg-[#8CD4CB] transition-colors cursor-pointer"
+                >
+                  Finish all
+                </button>
+              )}
 
-            {hasCompleted && (
-              <button
-                type="button"
-                onClick={onClearCompleted}
-                className="w-full py-2 px-3 text-xs md:text-sm font-medium border-b border-[#33322E] bg-white hover:bg-[#F6A89E] transition-colors cursor-pointer"
-              >
-                Clear Completed
-              </button>
-            )}
+              {hasCompleted && (
+                <button
+                  type="button"
+                  onClick={onClearCompleted}
+                  className="w-full py-2 px-3 text-xs md:text-sm font-medium border-b border-[#33322E] bg-white hover:bg-[#F6A89E] transition-colors cursor-pointer"
+                >
+                  Clear Completed
+                </button>
+              )}
 
-            {hasTodos && (
-              <button
-                type="button"
-                onClick={onClearAll}
-                className={`w-full py-2 px-3 text-xs md:text-sm font-medium bg-white hover:bg-[#F6A89E] transition-colors cursor-pointer ${
-                  trashCount > 0 ? "border-b border-[#33322E]" : ""
-                }`}
-              >
-                Clear All
-              </button>
-            )}
+              {hasTodos && (
+                <button
+                  type="button"
+                  onClick={onClearAll}
+                  className={`w-full py-2 px-3 text-xs md:text-sm font-medium bg-white hover:bg-[#F6A89E] transition-colors cursor-pointer ${
+                    trashCount > 0 ? "border-b border-[#33322E]" : ""
+                  }`}
+                >
+                  Clear All
+                </button>
+              )}
 
-            {trashCount > 0 && (
-              <button
-                type="button"
-                onClick={onClearTrash}
-                className="w-full py-2 px-3 text-xs md:text-sm font-medium bg-white hover:bg-[#F6A89E] transition-colors cursor-pointer"
-              >
-                Clear Trash
-              </button>
-            )}
-          </div>
-
-          {/* Section 3: Data Save */}
-          <div className="flex flex-col w-full">
-            <button
-              type="button"
-              onClick={onExport}
-              className="w-full py-2 px-3 text-xs md:text-sm font-medium bg-white hover:bg-[#f8d966] transition-colors cursor-pointer"
-            >
-              Export data
-            </button>
-          </div>
+              {trashCount > 0 && (
+                <button
+                  type="button"
+                  onClick={onClearTrash}
+                  className="w-full py-2 px-3 text-xs md:text-sm font-medium bg-white hover:bg-[#F6A89E] transition-colors cursor-pointer"
+                >
+                  Clear Trash
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </aside>

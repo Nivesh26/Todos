@@ -263,23 +263,6 @@ export const Hero = () => {
     setIsEditingSlogan(false);
   };
 
-  // Export data
-  const handleExport = () => {
-    const dataStr = JSON.stringify(todos, null, 2);
-    const date = new Date().toISOString().replace(/[-:.]/g, "").slice(0, 15);
-    const fileName = `todos-${date}.txt`;
-
-    const blob = new Blob([dataStr], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <div className="w-full min-h-screen py-10 px-4 md:px-8 flex flex-col items-center">
       {/* Header Container */}
@@ -372,24 +355,33 @@ export const Hero = () => {
           {/* List Area */}
           <div className="p-5 md:p-8 min-h-[360px] flex flex-col justify-between">
             {displayedTodos.length === 0 ? (
-              <div className="my-auto py-8 px-4 text-left select-none">
-                <div className="text-lg font-black text-[#33322E] mb-3">
-                  {filter === "removed"
-                    ? "Trash is empty 🗑️"
-                    : filter === "completed"
-                    ? "No completed tasks yet ⏳"
-                    : "Add Your First To-Do Item! 📝"}
-                </div>
-                {filter !== "removed" && (
-                  <ul className="space-y-2 text-sm text-[#33322E]/80 font-medium">
-                    <li className="font-bold text-[#33322E]">Usage Tips 💡:</li>
-                    <li>✔️ Press Enter to submit actions.</li>
-                    <li>✔️ Click ▲ / ▼ or drag to reorder tasks.</li>
-                    <li>✔️ Double-click to edit slogan and tasks.</li>
-                    <li>✔️ Access quick actions in the right sidebar.</li>
-                    <li>🔒 Your data is stored locally in your browser.</li>
-                    <li>📝 Supports data export.</li>
-                  </ul>
+              <div className="my-auto py-8 px-4 select-none text-center flex flex-col items-center justify-center">
+                {filter === "removed" ? (
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <span className="text-4xl">🗑️</span>
+                    <span className="text-xl font-black text-[#33322E]">Trash is empty</span>
+                  </div>
+                ) : filter === "completed" ? (
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <span className="text-4xl">⏳</span>
+                    <span className="text-xl font-black text-[#33322E]">No completed tasks yet</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="text-xl font-black text-[#33322E] mb-4 text-center">
+                      Add Your First To-Do Item! 📝
+                    </div>
+                    <div className="text-left inline-block">
+                      <div className="font-bold text-[#33322E] mb-2 text-sm">Usage Tips 💡:</div>
+                      <ul className="space-y-2 text-sm text-[#33322E]/80 font-medium">
+                        <li>✔️ Press Enter to submit actions.</li>
+                        <li>✔️ Click ▲ / ▼ or drag to reorder tasks.</li>
+                        <li>✔️ Double-click to edit slogan and tasks.</li>
+                        <li>✔️ Access quick actions in the right sidebar.</li>
+                        <li>🔒 Your data is stored locally in your browser.</li>
+                      </ul>
+                    </div>
+                  </div>
                 )}
               </div>
             ) : (
@@ -444,7 +436,6 @@ export const Hero = () => {
             onClearCompleted={handleClearCompleted}
             onClearAll={handleClearAll}
             onClearTrash={handleClearTrash}
-            onExport={handleExport}
           />
           <Stopwatch />
         </div>
